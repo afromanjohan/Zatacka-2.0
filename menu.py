@@ -1,9 +1,11 @@
 import pygame, sys, pickle
-from offline.game import Game
+from offline.game import Game as offGame
 from pygamemisc.button import Button
 from pygamemisc.textblit import Textblit
 from pygamemisc.color import colorTransformer as ct
 from pygamemisc.color import getNextColor as getPlayingColor
+from client.network import Network
+from client.game import Game as onGame
 
 
 class Menu:
@@ -48,6 +50,12 @@ class Menu:
             p = self.controllerList[i]
             t = Textblit(f'{color[0]}: {p}', 200, 300 + 60*i, color[1], size=30)
             t.blitText(self.win)
+        pygame.display.update()
+
+    def draw_waitingscreen(self, response=None):
+        self.win.fill(self.BG)
+        text = Textblit(response, 500, 500, (255, 255, 255), size=40)
+        text.blitText(self.win)
         pygame.display.update()
 
 
@@ -111,6 +119,16 @@ class Menu:
                         self.localOptionsScreen()
                     elif self.multiPlayerButton.isOver(pos):
                         print("pressed multiplayer")
+                        run = False
+                        self.localButton.toggleButton()
+                        self.multiPlayerButton.toggleButton()
+                        try:
+                            self.waitingScreen()
+                        except:
+                            quit()
+
+
+
                         #start client that connects to server
 
     def localOptionsScreen(self):
@@ -144,7 +162,28 @@ class Menu:
                         print("Pressed fewer players")
                         if self.numPlayers > 1: self.numPlayers -= 1
                     elif startGameButton.isOver(pos):
-                        game = Game(self.win, self.numPlayers)
+                        game = offGame(self.win, self.numPlayers)
+
+
+    def waitingScreen(self):
+        waiting = True
+        self.n = Network(self.name)
+        clock = pygame.time.Clock()
+        while waiting:
+            clock.tick(40)
+            response = self.n.send({-1:[]})
+            if not isinstance(response, str):
+                waiting = False
+                g = onGame(self.win, self.n)
+                g.run()
+            else:
+                self.draw_waitingscreen(response)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    waiting = False
+                    pygame.quit()
+                    quit()
+
 
 
 

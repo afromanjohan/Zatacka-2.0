@@ -1,5 +1,7 @@
-import pygame
+path = []
 
-x = pygame.key.K_LEFT
+for i in range(10):
+    path.append(i)
 
-print(x)
+
+print(path[-2:])

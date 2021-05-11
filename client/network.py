@@ -6,8 +6,8 @@ import time as t
 class Network:
     def __init__(self, name):
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server = "localhost"
-        self.port = 5556
+        self.server = "192.168.0.68"
+        self.port = 12000
         self.addr = (self.server, self.port)
         self.name = name
         self.connect()
